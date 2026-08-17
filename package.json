@@ -7,14 +7,17 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspace=@monitor/shared && npm run build --workspaces --if-present",
+    "test": "npm run build --workspace=@monitor/shared && npm run test --workspaces --if-present",
     "seed": "npm run build --workspace=@monitor/shared && npm run build --workspace=@monitor/worker && npm run start --workspace=@monitor/worker",
     "start": "npm run seed && concurrently -n backend,frontend -c blue,green \"npm run dev --workspace=@monitor/backend\" \"npm run dev --workspace=@monitor/frontend\"",
-    "fresh-start": "rm -rf data && npm run start"
+    "fresh-start": "rm -rf data && npm run start",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@playwright/test": "^1.49.0",
+    "concurrently": "^9.1.2",
+    "vitest": "^3.0.0"
   },
   "allowScripts": {
     "better-sqlite3@11.10.0": true,

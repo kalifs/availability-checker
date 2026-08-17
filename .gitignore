@@ -16,3 +16,9 @@ data/
 
 docs/decision-log.md
 docs/my-log.md
+
+# Playwright e2e
+playwright-report/
+test-results/
+e2e/.cache/
+

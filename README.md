@@ -56,4 +56,19 @@ npm run start --workspace=@monitor/worker   # one-shot pipeline run (build first
 
 The worker is not a long-running server — invoke it on a schedule (cron, CI scheduled job, etc.) rather than leaving it running.
 
+## Tests
+
+Unit/integration tests (Vitest):
+
+```sh
+npm test
+```
+
+End-to-end tests (Playwright) covering the dashboard's critical paths — listing rendering, mismatch highlighting, the backend-unreachable error state, and the refresh button. Self-contained: builds, seeds a dedicated `data/e2e.sqlite`, and starts the backend/frontend on isolated ports (3101/4301) automatically.
+
+```sh
+npx playwright install chromium   # once, downloads the browser binary
+npm run test:e2e
+```
+
 See [docs/architecture.md](docs/architecture.md) for the system design and [docs/decision-log.md](docs/decision-log.md) for the reasoning behind key choices.

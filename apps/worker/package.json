@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx src/run.ts",
     "build": "tsc -p tsconfig.json && mkdir -p dist/fixtures && cp src/fixtures/*.json dist/fixtures/",
-    "start": "node dist/run.js"
+    "start": "node dist/run.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "@monitor/shared": "0.1.0"
