@@ -1,122 +1,103 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useCallback, useEffect, useState } from "react";
+import type { RestaurantStatus } from "@monitor/shared";
+import { fetchRestaurants } from "./api";
+import "./App.css";
+
+type LoadState =
+  | { status: "loading" }
+  | { status: "error"; message: string }
+  | { status: "ready"; generatedAt: string; restaurants: RestaurantStatus[] };
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [state, setState] = useState<LoadState>({ status: "loading" });
+
+  const load = useCallback(() => {
+    setState({ status: "loading" });
+    fetchRestaurants()
+      .then(({ generatedAt, restaurants }) => setState({ status: "ready", generatedAt, restaurants }))
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        setState({ status: "error", message });
+      });
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+    <main>
+      <header>
+        <h1>Restaurant availability monitor</h1>
+        <button type="button" onClick={load}>
+          Refresh
         </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
+      {state.status === "loading" && <p>Loading…</p>}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {state.status === "error" && (
+        <p role="alert" className="error">
+          Could not reach the backend: {state.message}
+        </p>
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {state.status === "ready" && (
+        <>
+          <p className="generated-at">Snapshot data as of: {new Date(state.generatedAt).toLocaleString()}</p>
+          <RestaurantTable restaurants={state.restaurants} />
+        </>
+      )}
+    </main>
+  );
 }
 
-export default App
+function RestaurantTable({ restaurants }: { restaurants: RestaurantStatus[] }) {
+  if (restaurants.length === 0) {
+    return <p>No restaurants tracked yet — run the pipeline to seed data.</p>;
+  }
+
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Chain</th>
+          <th>Branch</th>
+          <th>Expected</th>
+          <th>Actual</th>
+          <th>Last checked</th>
+          <th>Listing</th>
+        </tr>
+      </thead>
+      <tbody>
+        {restaurants.map((restaurant) => (
+          <tr key={restaurant.id} className={restaurant.mismatch ? "mismatch" : undefined}>
+            <td>{restaurant.chain}</td>
+            <td>{restaurant.branch}</td>
+            <td>{formatExpected(restaurant.expectedState)}</td>
+            <td>{formatActual(restaurant.actualState)}</td>
+            <td>{restaurant.lastFetchedAt ? new Date(restaurant.lastFetchedAt).toLocaleString() : "never"}</td>
+            <td>
+              <a href={restaurant.platformUrl} target="_blank" rel="noreferrer">
+                view
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function formatExpected(state: RestaurantStatus["expectedState"]): string {
+  if (state === null) return "unknown";
+  return state === "expected-open" ? "should be open" : "should be closed";
+}
+
+function formatActual(state: RestaurantStatus["actualState"]): string {
+  if (state === null) return "no data yet";
+  return state === "available" ? "available" : "unavailable";
+}
+
+export default App;
+
