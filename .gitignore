@@ -14,7 +14,6 @@ dist/
 *.sqlite-wal
 data/
 
-docs/decision-log.md
 docs/my-log.md
 
 # Playwright e2e

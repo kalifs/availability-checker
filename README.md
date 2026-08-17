@@ -52,9 +52,10 @@ Each app runs independently:
 npm run dev --workspace=@monitor/frontend   # dashboard, Vite dev server
 npm run dev --workspace=@monitor/backend    # API, http://localhost:3001
 npm run start --workspace=@monitor/worker   # one-shot pipeline run (build first: npm run build --workspace=@monitor/worker)
+npm run dev:serve --workspace=@monitor/worker  # same pipeline, as an HTTP trigger: POST http://localhost:3002/run
 ```
 
-The worker is not a long-running server — invoke it on a schedule (cron, CI scheduled job, etc.) rather than leaving it running.
+The worker is not a long-running server by design — run it via cron (`start`) or trigger it over HTTP (`serve`) on a schedule, rather than leaving it running continuously.
 
 ## Tests
 
