@@ -1,1 +1,14 @@
 CASE-STUDY.md
+
+# working plan, not part of the submission
+PLAN.md
+
+# node
+node_modules/
+dist/
+
+# local db files produced by the worker/backend
+*.sqlite
+*.sqlite-journal
+
+docs/decision-log.md
