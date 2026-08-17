@@ -7,6 +7,9 @@ PLAN.md
 node_modules/
 dist/
 
+# local env overrides (see .env.example in each app)
+.env
+
 # local db files produced by the worker/backend (WAL mode adds -shm/-wal siblings)
 *.sqlite
 *.sqlite-journal

@@ -7,8 +7,8 @@
     "dev": "tsx src/run.ts",
     "dev:serve": "tsx src/httpServer.ts",
     "build": "tsc -p tsconfig.json && mkdir -p dist/fixtures && cp src/fixtures/*.json dist/fixtures/",
-    "start": "node dist/run.js",
-    "serve": "node dist/httpServer.js",
+    "start": "node --env-file-if-exists=.env dist/run.js",
+    "serve": "node --env-file-if-exists=.env dist/httpServer.js",
     "test": "vitest run"
   },
   "dependencies": {
