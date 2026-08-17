@@ -51,3 +51,17 @@ export class MalformedListingError extends Error {
     this.name = "MalformedListingError";
   }
 }
+
+/** Shape served by the backend API and consumed by the frontend dashboard. */
+export interface RestaurantStatus {
+  id: string;
+  chain: string;
+  name: string;
+  branch: string;
+  platformUrl: string;
+  actualState: AvailabilityState | null;
+  expectedState: "expected-open" | "expected-closed" | null;
+  mismatch: boolean;
+  lastFetchedAt: string | null;
+  source: SnapshotSource | null;
+}
