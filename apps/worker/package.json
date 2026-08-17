@@ -5,14 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/run.ts",
+    "dev:serve": "tsx src/httpServer.ts",
     "build": "tsc -p tsconfig.json && mkdir -p dist/fixtures && cp src/fixtures/*.json dist/fixtures/",
     "start": "node dist/run.js",
+    "serve": "node dist/httpServer.js",
     "test": "vitest run"
   },
   "dependencies": {
-    "@monitor/shared": "0.1.0"
+    "@monitor/shared": "0.1.0",
+    "express": "^4.19.2"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

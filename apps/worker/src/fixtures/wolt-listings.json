@@ -1,0 +1,29 @@
+{
+  "5ae605a7349077000b1f5ef4": {
+    "restaurantId": "5ae605a7349077000b1f5ef4",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "06:00", "end": "23:00" }]
+  },
+  "5ae6013cf78b5a000bb64022": {
+    "restaurantId": "5ae6013cf78b5a000bb64022",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "06:00", "end": "23:00" }]
+  },
+  "68dceacd048dce1b6a99ecd8": {
+    "restaurantId": "68dceacd048dce1b6a99ecd8",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "07:00", "end": "22:00" }]
+  },
+  "62e26f2ecf2836517a0b1141": {
+    "restaurantId": "62e26f2ecf2836517a0b1141",
+    "isAcceptingOrders": false,
+    "openingHoursToday": [{ "start": "07:00", "end": "23:00" }]
+  },
+  "664da8e02b117f45247ad49a": {
+    "restaurantId": "664da8e02b117f45247ad49a",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "10:00", "end": "01:00" }]
+  }
+}
+
+

@@ -1,9 +1,9 @@
 import { insertSnapshot, upsertRestaurant, type AvailabilitySnapshot, type RestaurantListing, type SnapshotSource } from "@monitor/shared";
 import type Database from "better-sqlite3";
-import { fetchLiveListing } from "./fetchLive.js";
 import { getFixtureListing } from "./fixtureSource.js";
 import { normalizeListing } from "./normalize.js";
-import { parseDeliverooHtml } from "./parseDeliveroo.js";
+import { WOLT_DISCOVERY_COORDS } from "./restaurants.js";
+import { fetchWoltDiscovery, type WoltVenueStatus } from "./wolt.js";
 
 export interface ListingResult {
   restaurantId: string;
@@ -12,26 +12,35 @@ export interface ListingResult {
   error?: string;
 }
 
-/** Fetches (live, falling back to fixture), normalizes, and persists a snapshot for one restaurant. */
-async function processRestaurant(db: Database.Database, restaurant: RestaurantListing): Promise<ListingResult> {
+/**
+ * Builds a snapshot for one restaurant: live `online` status (if the discovery fetch
+ * succeeded and this venue was in range) combined with fixture opening hours, since
+ * Wolt's public discovery endpoint doesn't expose hours. Falls back to a fully-fixture
+ * snapshot if live status isn't available for this restaurant.
+ */
+function processRestaurant(
+  db: Database.Database,
+  restaurant: RestaurantListing,
+  liveStatuses: Map<string, WoltVenueStatus> | null,
+  fetchedAt: string,
+): ListingResult {
   upsertRestaurant(db, restaurant);
-  const fetchedAt = new Date().toISOString();
 
-  let source: SnapshotSource;
-  let raw;
+  let fixture;
   try {
-    const live = await fetchLiveListing(restaurant.platformUrl);
-    raw = parseDeliverooHtml(live.html, restaurant.id);
-    source = "live";
-  } catch (liveError) {
-    try {
-      raw = getFixtureListing(restaurant.id);
-      source = "fixture";
-    } catch (fixtureError) {
-      const reason = fixtureError instanceof Error ? fixtureError.message : String(fixtureError);
-      return { restaurantId: restaurant.id, ok: false, error: `no live data and no fixture: ${reason}` };
-    }
+    fixture = getFixtureListing(restaurant.id);
+  } catch (fixtureError) {
+    const reason = fixtureError instanceof Error ? fixtureError.message : String(fixtureError);
+    return { restaurantId: restaurant.id, ok: false, error: `no fixture for opening hours: ${reason}` };
   }
+
+  const live = liveStatuses?.get(restaurant.id);
+  const source: SnapshotSource = live ? "live" : "fixture";
+  const raw = {
+    restaurantId: restaurant.id,
+    isAcceptingOrders: live ? live.online : fixture.isAcceptingOrders,
+    openingHoursToday: fixture.openingHoursToday,
+  };
 
   let snapshot: AvailabilitySnapshot;
   try {
@@ -46,9 +55,14 @@ async function processRestaurant(db: Database.Database, restaurant: RestaurantLi
 }
 
 export async function runPipeline(db: Database.Database, restaurants: RestaurantListing[]): Promise<ListingResult[]> {
-  const results: ListingResult[] = [];
-  for (const restaurant of restaurants) {
-    results.push(await processRestaurant(db, restaurant));
+  const fetchedAt = new Date().toISOString();
+
+  let liveStatuses: Map<string, WoltVenueStatus> | null = null;
+  try {
+    liveStatuses = await fetchWoltDiscovery(WOLT_DISCOVERY_COORDS.lat, WOLT_DISCOVERY_COORDS.lon);
+  } catch {
+    liveStatuses = null; // whole-city fetch failed; every restaurant falls back to its fixture below
   }
-  return results;
+
+  return restaurants.map((restaurant) => processRestaurant(db, restaurant, liveStatuses, fetchedAt));
 }
