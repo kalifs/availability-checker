@@ -10,13 +10,13 @@ title System Context — Restaurant Availability Monitor
 
 Person(ops, "Operations team", "Monitors restaurant availability across locations")
 System(monitor, "Availability Monitor", "Tracks expected vs actual availability for restaurant listings")
-System_Ext(platform, "Delivery platform (Deliveroo)", "Public, unauthenticated store pages: opening hours + live availability")
+System_Ext(platform, "Delivery platform (Wolt)", "Public, unauthenticated discovery API: live order-acceptance status per venue")
 
 Rel(ops, monitor, "Views dashboard, spots mismatches")
-Rel(monitor, platform, "Fetches listing pages / public routes (no auth)")
+Rel(monitor, platform, "Calls the public restaurant-discovery endpoint (no auth)")
 ```
 
-Constraint: the monitor only ever calls public, unauthenticated routes on the delivery platform — no login, no private API keys, no bypassing bot protection.
+Constraint: the monitor only ever calls public, unauthenticated routes on the delivery platform — no login, no private API keys, no bypassing bot protection. (We deliberately evaluated Deliveroo first; its listing pages are client-rendered and return 403 to server-side fetches, so we moved to Wolt, whose public discovery API returns live venue status directly as JSON — see the decision log.)
 
 ## C2 — Container
 
@@ -33,7 +33,7 @@ System_Boundary(monitor, "Availability Monitor") {
   Container(worker, "Pipeline / Worker", "TypeScript CLI", "One-shot job: fetch listing -> normalize -> persist. Invoked by cron or HTTP trigger, then exits")
   ContainerDb(db, "Database", "SQLite", "Restaurants, opening hours, availability snapshots")
 }
-System_Ext(platform, "Delivery platform (Deliveroo)", "Public store pages")
+System_Ext(platform, "Delivery platform (Wolt)", "Public restaurant-discovery API")
 System_Ext(scheduler, "Scheduler (cron / HTTP trigger)", "Triggers the worker on an interval")
 
 Rel(ops, frontend, "HTTPS")
@@ -81,7 +81,7 @@ Notes:
 Rough order-of-magnitude, assuming a 5-minute average polling interval (tiered per the scaling section above):
 
 - **Fetch volume**: ~12 fetches/hour/restaurant × 10,000 = ~120k/hour, ~2.9M/day, ~86M/month.
-- **Compute** (serverless workers, ~1-2s per fetch, 256-512MB): low hundreds of dollars/month for plain HTTP fetches. **This is the single biggest cost risk**: if getting real (non-fixture) data ever requires headless-browser rendering — plausible, since we confirmed Deliveroo's listing pages are client-rendered and return 403 to plain server-side fetches — per-fetch cost and duration go up roughly 10-50x, which could push compute into the low thousands/month instead. Worth validating with a real spike before committing to a polling frequency at this scale.
+- **Compute** (serverless workers, ~1-2s per fetch, 256-512MB): low hundreds of dollars/month for plain HTTP fetches. Wolt's discovery endpoint returns many venues per call, so at scale this is closer to N calls-per-area rather than N calls-per-restaurant, reducing this further. **The cost risk we identified while evaluating platforms**: Deliveroo's listing pages are client-rendered and return 403 to plain server-side fetches, so getting live data from a platform like that would require headless-browser rendering — 10-50x the per-fetch cost/duration of the plain-JSON approach Wolt allows. Worth validating per-platform before committing to a polling frequency at this scale, since not every delivery platform is as fetch-friendly as Wolt turned out to be.
 - **Database** (managed Postgres, small-to-medium instance): ~$50-150/month; snapshot history is the main growth driver, mitigated by a retention policy (e.g. 30 days raw, rolled up to daily summaries beyond that).
 - **Messaging** (queue + pub/sub for fan-out and notifications): usage-based, likely under $50/month at this volume.
 - **API + frontend hosting**: small always-on instance or serverless API, ~$20-50/month.

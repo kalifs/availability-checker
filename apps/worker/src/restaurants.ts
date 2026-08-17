@@ -1,47 +1,50 @@
 import type { RestaurantListing } from "@monitor/shared";
 
 /**
- * Real, confirmed-to-exist Deliveroo listings. Their menu pages return 403 to server-side
- * fetches (bot protection), so opening hours below are PLACEHOLDER assumptions, not scraped
- * data — Camden is deliberately modelled as crossing midnight (11:00-01:00) to satisfy the
- * brief's requirement. Replace with real hours once confirmed.
+ * Real, live Wolt (Helsinki) listings verified via the public discovery API
+ * (https://restaurant-api.wolt.com/v1/pages/restaurants) — no auth, no bot protection.
+ * That endpoint returns live `online` status for every venue, which the pipeline uses
+ * directly for `actualState`. It does NOT expose opening hours, so `expectedHoursToday`
+ * still comes from the recorded fixture (fixtures/wolt-listings.json) — Töölö is set to
+ * cross midnight there to satisfy the brief's requirement.
  */
+export const WOLT_DISCOVERY_COORDS = { lat: 60.1699, lon: 24.9384 }; // central Helsinki
 
 export const restaurants: RestaurantListing[] = [
   {
-    id: "mcdonalds-liverpool-street",
+    id: "5ae605a7349077000b1f5ef4",
     chain: "McDonald's",
     name: "McDonald's",
-    branch: "Liverpool Street",
-    platformUrl: "https://deliveroo.co.uk/menu/London/liverpool-street/mcdonalds-0444-liverpool-street",
+    branch: "Helsinki Forum Katutaso",
+    platformUrl: "https://wolt.com/en/fin/helsinki/restaurant/mcdonalds-forum-katutaso",
   },
   {
-    id: "mcdonalds-camden",
+    id: "5ae6013cf78b5a000bb64022",
     chain: "McDonald's",
     name: "McDonald's",
-    branch: "Camden",
-    platformUrl: "https://deliveroo.co.uk/menu/London/camden/mcdonalds-0419-camden",
+    branch: "Helsinki Kamppi",
+    platformUrl: "https://wolt.com/en/fin/helsinki/restaurant/mcdonalds-kamppi-1",
   },
   {
-    id: "mcdonalds-croydon-poppy-ph",
+    id: "68dceacd048dce1b6a99ecd8",
     chain: "McDonald's",
     name: "McDonald's",
-    branch: "Croydon - The Poppy PH",
-    platformUrl: "https://deliveroo.co.uk/menu/London/shirley-wickham/mcdonalds-1049-croydon-the-poppy-ph/",
+    branch: "Helsinki Jätkäsaari",
+    platformUrl: "https://wolt.com/en/fin/helsinki/restaurant/mcdonalds-jatkasaari",
   },
   {
-    id: "mcdonalds-croydon-swan-close",
+    id: "62e26f2ecf2836517a0b1141",
     chain: "McDonald's",
     name: "McDonald's",
-    branch: "Croydon - Swan Close (delivery kitchen)",
-    platformUrl: "https://deliveroo.co.uk/menu/London/selhurst/mcdonalds-1625-croydon-swan-close-delivery-kitchen",
+    branch: "Helsinki Hakaniemi",
+    platformUrl: "https://wolt.com/en/fin/helsinki/restaurant/mcdonalds-helsinki-hakaniemi-uusi",
   },
   {
-    id: "mcdonalds-manchester-arndale",
+    id: "664da8e02b117f45247ad49a",
     chain: "McDonald's",
     name: "McDonald's",
-    branch: "Manchester Arndale",
-    platformUrl: "https://deliveroo.co.uk/menu/Manchester/manchester-central/mcdonalds-1120-manchester-arndale-food-chain/",
+    branch: "Helsinki Töölö",
+    platformUrl: "https://wolt.com/en/fin/helsinki/restaurant/mcdonalds-toolo",
   },
 ];
 
