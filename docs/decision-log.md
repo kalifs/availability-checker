@@ -5,8 +5,10 @@
 - **npm workspaces**, no Turborepo/Nx: keeps the monorepo simple for a ~4-hour scope; `apps/frontend`, `apps/backend`, `apps/worker` each start independently, `packages/shared` holds cross-app types.
 - **Worker as a one-shot CLI**, not a server: matches "cron job or HTTP request" from the brief and keeps the read path (backend/frontend) decoupled from platform fetch failures. Also added a thin HTTP trigger (`POST /run`) exposing the exact same `runOnce()` logic, so it's genuinely runnable either way rather than just documented as a future option.
 - **SQLite**: zero-config, file-based, good enough to demonstrate the data model without provisioning infrastructure.
+- **Logging**: uses console log for now but in production would use some production ready logger and telemetry tool/framework.
 - **Express** over Fastify/NestJS: minimal ceremony for a small read API.
 - **Mermaid C4** diagrams: render directly in GitHub's markdown preview, no extra tooling needed to review.
+- **Environment variables** are all defaulting to some local values, but in production would be part of deployment setup. The ones used are extracted to .env.example files for quick reference.
 
 ## What was rejected
 - Turborepo/Nx — unnecessary orchestration overhead for three small apps.
@@ -34,4 +36,6 @@
 - Swap SQLite for Postgres via docker-compose, to make the follow-up discussion about scaling less hypothetical.
 
 ## Time spent
+~2 hours initially to set up project and resources
 ~3.5 hours as of the last check-in during this session, plus the additional iterations after that (backend HTTP trigger, architecture doc, this log, README polish) — will confirm the final total honestly at submission time rather than estimate it here.
+~0.5 hours spent switching to Wolt from Deliveroo
