@@ -1,0 +1,28 @@
+{
+  "mcdonalds-liverpool-street": {
+    "restaurantId": "mcdonalds-liverpool-street",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "06:00", "end": "23:00" }]
+  },
+  "mcdonalds-camden": {
+    "restaurantId": "mcdonalds-camden",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "11:00", "end": "01:00" }]
+  },
+  "mcdonalds-croydon-poppy-ph": {
+    "restaurantId": "mcdonalds-croydon-poppy-ph",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "06:00", "end": "23:00" }]
+  },
+  "mcdonalds-croydon-swan-close": {
+    "restaurantId": "mcdonalds-croydon-swan-close",
+    "isAcceptingOrders": false,
+    "openingHoursToday": [{ "start": "10:00", "end": "22:00" }]
+  },
+  "mcdonalds-manchester-arndale": {
+    "restaurantId": "mcdonalds-manchester-arndale",
+    "isAcceptingOrders": true,
+    "openingHoursToday": [{ "start": "07:00", "end": "22:00" }]
+  }
+}
+

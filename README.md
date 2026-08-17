@@ -12,6 +12,32 @@ packages/shared Shared TypeScript types
 docs/           Architecture doc and decision log
 ```
 
+## Installation
+
+Prerequisites:
+- Node.js 20+ and npm 10+ (needed for native module support and workspaces).
+- A C/C++ build toolchain, needed by `better-sqlite3` to compile its native addon on install: on Debian/Ubuntu, `sudo apt-get install -y build-essential python3`; on macOS, `xcode-select --install`; on Windows, install the "Desktop development with C++" workload via Visual Studio Build Tools.
+- **No separate database server to install.** `better-sqlite3` embeds SQLite directly in the Node process — there's no MySQL/Postgres/SQLite daemon to run or configure; the pipeline just writes to a local file (`data/monitor.sqlite`).
+
+1. Clone the repo and move into it.
+2. Install all workspace dependencies from the repo root:
+
+   ```sh
+   npm install
+   ```
+
+   This also builds `better-sqlite3`'s native addon using the toolchain above (its install script is pre-approved in the root `package.json`'s `allowScripts`). If this step fails, it's almost always the build toolchain prerequisite above being missing.
+3. Build the shared package and worker once, then run the pipeline to seed the local SQLite database:
+
+   ```sh
+   npm run build --workspace=@monitor/shared
+   npm run build --workspace=@monitor/worker
+   npm run start --workspace=@monitor/worker
+   ```
+
+   This writes to `data/monitor.sqlite` (path overridable via `MONITOR_DB_PATH`). Re-run it any time to refresh snapshots.
+4. Start the backend and frontend (see below).
+
 ## Getting started
 
 Install everything once from the repo root:

@@ -7,8 +7,12 @@ PLAN.md
 node_modules/
 dist/
 
-# local db files produced by the worker/backend
+# local db files produced by the worker/backend (WAL mode adds -shm/-wal siblings)
 *.sqlite
 *.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+data/
 
 docs/decision-log.md
+docs/my-log.md
